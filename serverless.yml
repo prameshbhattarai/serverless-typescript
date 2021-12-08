@@ -1,0 +1,42 @@
+service: sample-api
+
+provider:
+  name: aws
+  runtime: nodejs14.x
+  environment:
+    NODE_ENV: dev
+
+plugins:
+  - serverless-plugin-typescript
+  - serverless-dotenv-plugin
+  - serverless-plugin-warmup
+  - serverless-deployment-bucket
+  - serverless-offline
+
+custom:
+  warmup:
+    default:
+      enabled: false
+
+package:
+  individually: true
+  exclude:
+    - config/.env.stg
+    - config/.env.pro
+  include:
+    - config/.env.dev
+
+functions:
+  customer:
+    handler: app/customer-lambda.handler
+    timeout: 60
+    memorySize: 512
+    events:
+      - http:
+          path: /customer
+          method: ANY
+          cors: true
+      - http:
+          path: /customer/{proxy+}
+          method: ANY
+          cors: true
